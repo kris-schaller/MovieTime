@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- App-wide -->
+    <dimen name="card_default_elevation">2dp</dimen>
+    
+    <!-- Movie Poster List -->
+    <dimen name="list_content_left_right_padding">3dp</dimen>
+    <dimen name="list_poster_card_margin">3dp</dimen>
+    <dimen name="list_poster_height">277dp</dimen>
+    <dimen name="list_poster_title_margin">15dp</dimen>
+    <dimen name="list_poster_title_size">12sp</dimen>
+    <dimen name="list_poster_width">180dp</dimen>
+
+</resources>
