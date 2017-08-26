@@ -22,13 +22,16 @@ import schaller.com.movetime.layout_manager.StaggeredGridAutoFitLayoutManager;
 import schaller.com.movetime.movies_list.adapter.MovieListAdapter;
 import schaller.com.movetime.movies_list.models.MoviePosterItem;
 import schaller.com.movetime.movies_list.util.MovieListUtil;
+import schaller.com.movetime.scroll_listener.EndlessOnScrollListener;
 
 public class MovieListActivity extends AppCompatActivity
-        implements MovieListAdapter.OnMovieClickListener {
+        implements MovieListAdapter.OnMovieClickListener,
+        EndlessOnScrollListener.OnLoadMoreListener {
 
     private List<MoviePosterItem> moviePosterItemList = new ArrayList<>();
     private MovieListAdapter adapter;
     private StaggeredGridAutoFitLayoutManager staggeredGridAutoFitLayoutManager;
+    private EndlessOnScrollListener endlessOnScrollListener;
 
     @BindView(R.id.movie_list) RecyclerView recyclerView;
 
@@ -48,7 +51,12 @@ public class MovieListActivity extends AppCompatActivity
                 StaggeredGridLayoutManager.VERTICAL,
                 Math.round(getResources().getDimension(R.dimen.list_poster_width)));
 
+        endlessOnScrollListener = new EndlessOnScrollListener(
+                staggeredGridAutoFitLayoutManager,
+                this);
+
         recyclerView.setLayoutManager(staggeredGridAutoFitLayoutManager);
+        recyclerView.addOnScrollListener(endlessOnScrollListener);
         recyclerView.setAdapter(adapter);
     }
 
@@ -93,6 +101,7 @@ public class MovieListActivity extends AppCompatActivity
         super.onDestroy();
         recyclerView.setLayoutManager(null);
         adapter.setMovieClickListener(null);
+        endlessOnScrollListener.setOnLoadMoreListener(null);
     }
 
     //region OnMovieClickListener
@@ -101,4 +110,13 @@ public class MovieListActivity extends AppCompatActivity
         Toast.makeText(this, moviePosterItem.getMovieTitle(), Toast.LENGTH_SHORT).show();
     }
     //endregion OnMovieClickListener
+
+    //region OnLoadMoreListener
+    @Override
+    public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+        moviePosterItemList.addAll(MovieListUtil.generateMockMovieDataList(10));
+        adapter.setMoviePosterItems(moviePosterItemList);
+    }
+    //endregion OnLoadMoreListener
+
 }
