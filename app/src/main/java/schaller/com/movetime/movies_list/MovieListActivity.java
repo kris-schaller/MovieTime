@@ -18,6 +18,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import schaller.com.movetime.R;
+import schaller.com.movetime.layout_manager.StaggeredGridAutoFitLayoutManager;
 import schaller.com.movetime.movies_list.adapter.MovieListAdapter;
 import schaller.com.movetime.movies_list.models.MoviePosterItem;
 import schaller.com.movetime.movies_list.util.MovieListUtil;
@@ -27,7 +28,7 @@ public class MovieListActivity extends AppCompatActivity
 
     private List<MoviePosterItem> moviePosterItemList = new ArrayList<>();
     private MovieListAdapter adapter;
-    private StaggeredGridLayoutManager staggeredGridLayoutManager;
+    private StaggeredGridAutoFitLayoutManager staggeredGridAutoFitLayoutManager;
 
     @BindView(R.id.movie_list) RecyclerView recyclerView;
 
@@ -42,11 +43,12 @@ public class MovieListActivity extends AppCompatActivity
         adapter.setMoviePosterItems(moviePosterItemList);
         adapter.setMovieClickListener(this);
 
-        staggeredGridLayoutManager = new StaggeredGridLayoutManager(
-                2,
-                StaggeredGridLayoutManager.VERTICAL);
+        staggeredGridAutoFitLayoutManager = new StaggeredGridAutoFitLayoutManager(
+                this,
+                StaggeredGridLayoutManager.VERTICAL,
+                Math.round(getResources().getDimension(R.dimen.list_poster_width)));
 
-        recyclerView.setLayoutManager(staggeredGridLayoutManager);
+        recyclerView.setLayoutManager(staggeredGridAutoFitLayoutManager);
         recyclerView.setAdapter(adapter);
     }
 
