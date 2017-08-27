@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.widget.TextViewCompat;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,8 +25,9 @@ import butterknife.ButterKnife;
 import schaller.com.movetime.R;
 import schaller.com.movetime.movies_list.models.MoviePosterItem;
 import schaller.com.movetime.movies_list.util.MoviePosterDiffUtilCallback;
+import schaller.com.movetime.progress_adapter.adapter.ProgressAdapter;
 
-public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.MoviePosterViewHolder> {
+public class MovieListAdapter extends ProgressAdapter<MoviePosterItem> {
 
     private List<MoviePosterItem> moviePosterItems = new ArrayList<>();
     private OnMovieClickListener movieClickListener;
@@ -36,23 +38,39 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.Movi
 
     }
 
-    public MovieListAdapter() {
-        // no-op
+    public MovieListAdapter(@NonNull StaggeredGridLayoutManager layoutManager) {
+        super(layoutManager);
+    }
+
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent,
+                                                      int viewType) {
+        switch (viewType) {
+            case ItemType.ITEM:
+                return new MoviePosterViewHolder(
+                        LayoutInflater.from(parent.getContext()).inflate(
+                                R.layout.movie_poster_item,
+                                parent,
+                                false));
+            default:
+                return super.onCreateViewHolder(parent, viewType);
+        }
     }
 
     @Override
-    public MoviePosterViewHolder onCreateViewHolder(ViewGroup parent,
-                                                    int viewType) {
-        return new MoviePosterViewHolder(
-                LayoutInflater.from(parent.getContext()).inflate(
-                        R.layout.movie_poster_item,
-                        parent,
-                        false));
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        switch (holder.getItemViewType()) {
+            case ItemType.ITEM:
+                bindMoviePosterViewHolder((MoviePosterViewHolder) holder, position);
+                break;
+            default:
+                super.onBindViewHolder(holder, position);
+                break;
+        }
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MoviePosterViewHolder holder, int position) {
-        bindMoviePosterViewHolder(holder, position);
+    public List<MoviePosterItem> getItems() {
+        return moviePosterItems;
     }
 
     @Override

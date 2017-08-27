@@ -3,7 +3,8 @@
 
     <!-- App-wide -->
     <dimen name="card_default_elevation">2dp</dimen>
-    
+    <dimen name="loading_progress_bar_padding">5dp</dimen>
+
     <!-- Movie Poster List -->
     <dimen name="list_content_left_right_padding">3dp</dimen>
     <dimen name="list_poster_card_margin">3dp</dimen>

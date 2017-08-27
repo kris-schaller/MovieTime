@@ -1,6 +1,7 @@
 package schaller.com.movetime.movies_list;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -32,6 +33,7 @@ public class MovieListActivity extends AppCompatActivity
     private MovieListAdapter adapter;
     private StaggeredGridAutoFitLayoutManager staggeredGridAutoFitLayoutManager;
     private EndlessOnScrollListener endlessOnScrollListener;
+    private Handler handler = new Handler();
 
     @BindView(R.id.movie_list) RecyclerView recyclerView;
 
@@ -41,15 +43,15 @@ public class MovieListActivity extends AppCompatActivity
         setContentView(R.layout.movie_list_layout);
         ButterKnife.bind(this);
 
-        moviePosterItemList.addAll(MovieListUtil.generateMockMovieDataList(10));
-        adapter = new MovieListAdapter();
-        adapter.setMoviePosterItems(moviePosterItemList);
-        adapter.setMovieClickListener(this);
-
         staggeredGridAutoFitLayoutManager = new StaggeredGridAutoFitLayoutManager(
                 this,
                 StaggeredGridLayoutManager.VERTICAL,
                 Math.round(getResources().getDimension(R.dimen.list_poster_width)));
+
+        moviePosterItemList.addAll(MovieListUtil.generateMockMovieDataList(10));
+        adapter = new MovieListAdapter(staggeredGridAutoFitLayoutManager);
+        adapter.setMoviePosterItems(moviePosterItemList);
+        adapter.setMovieClickListener(this);
 
         endlessOnScrollListener = new EndlessOnScrollListener(
                 staggeredGridAutoFitLayoutManager,
@@ -114,8 +116,22 @@ public class MovieListActivity extends AppCompatActivity
     //region OnLoadMoreListener
     @Override
     public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
-        moviePosterItemList.addAll(MovieListUtil.generateMockMovieDataList(10));
-        adapter.setMoviePosterItems(moviePosterItemList);
+        // These need to be posted on the same thread so we avoid race conditions causing the
+        // loading indicator/items to not display
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                adapter.showLoadingIndicator(true);
+            }
+        });
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                moviePosterItemList.addAll(MovieListUtil.generateMockMovieDataList(10));
+                adapter.setMoviePosterItems(moviePosterItemList);
+                adapter.showLoadingIndicator(false);
+            }
+        }, 5000);
     }
     //endregion OnLoadMoreListener
 
