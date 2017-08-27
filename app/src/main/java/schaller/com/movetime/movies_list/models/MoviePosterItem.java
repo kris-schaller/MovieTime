@@ -1,10 +1,12 @@
 package schaller.com.movetime.movies_list.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import static android.support.v4.util.Preconditions.checkStringNotEmpty;
 
-public class MoviePosterItem {
+public class MoviePosterItem implements Parcelable {
 
     private final Builder moviePosterBuilder;
 
@@ -62,11 +64,39 @@ public class MoviePosterItem {
     }
     //endregion equals, hashCode, and toString
 
+    //region Parcelable
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeParcelable(this.moviePosterBuilder, flags);
+    }
+
+    protected MoviePosterItem(Parcel in) {
+        this.moviePosterBuilder = in.readParcelable(Builder.class.getClassLoader());
+    }
+
+    public static final Creator<MoviePosterItem> CREATOR = new Creator<MoviePosterItem>() {
+        @Override
+        public MoviePosterItem createFromParcel(Parcel source) {
+            return new MoviePosterItem(source);
+        }
+
+        @Override
+        public MoviePosterItem[] newArray(int size) {
+            return new MoviePosterItem[size];
+        }
+    };
+    //endregion Parcelable
+
     public Builder newBuilder() {
         return new Builder(this);
     }
 
-    public static class Builder {
+    public static class Builder implements Parcelable {
 
         private String id;
         private String moviePosterUrl;
@@ -154,6 +184,42 @@ public class MoviePosterItem {
             return result;
         }
         //endregion equals & hashcode
+
+        //region Parcelable
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(this.id);
+            dest.writeString(this.moviePosterUrl);
+            dest.writeString(this.movieTitle);
+            dest.writeFloat(this.popularity);
+            dest.writeFloat(this.rating);
+        }
+
+        protected Builder(Parcel in) {
+            this.id = in.readString();
+            this.moviePosterUrl = in.readString();
+            this.movieTitle = in.readString();
+            this.popularity = in.readFloat();
+            this.rating = in.readFloat();
+        }
+
+        public static final Creator<Builder> CREATOR = new Creator<Builder>() {
+            @Override
+            public Builder createFromParcel(Parcel source) {
+                return new Builder(source);
+            }
+
+            @Override
+            public Builder[] newArray(int size) {
+                return new Builder[size];
+            }
+        };
+        //endregion Parcelable
     }
 
 }

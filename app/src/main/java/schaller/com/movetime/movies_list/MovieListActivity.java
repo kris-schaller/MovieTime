@@ -14,7 +14,6 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -29,7 +28,9 @@ public class MovieListActivity extends AppCompatActivity
         implements MovieListAdapter.OnMovieClickListener,
         EndlessOnScrollListener.OnLoadMoreListener {
 
-    private List<MoviePosterItem> moviePosterItemList = new ArrayList<>();
+    private static final String MOVIE_LIST_KEY = "movie_list_key";
+
+    private ArrayList<MoviePosterItem> moviePosterItemList = new ArrayList<>();
     private MovieListAdapter adapter;
     private StaggeredGridAutoFitLayoutManager staggeredGridAutoFitLayoutManager;
     private EndlessOnScrollListener endlessOnScrollListener;
@@ -48,7 +49,13 @@ public class MovieListActivity extends AppCompatActivity
                 StaggeredGridLayoutManager.VERTICAL,
                 Math.round(getResources().getDimension(R.dimen.list_poster_width)));
 
-        moviePosterItemList.addAll(MovieListUtil.generateMockMovieDataList(10));
+        if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_LIST_KEY)) {
+            //noinspection unchecked
+            moviePosterItemList = (ArrayList<MoviePosterItem>) savedInstanceState
+                    .get(MOVIE_LIST_KEY);
+        } else {
+            moviePosterItemList.addAll(MovieListUtil.generateMockMovieDataList(10));
+        }
         adapter = new MovieListAdapter(staggeredGridAutoFitLayoutManager);
         adapter.setMoviePosterItems(moviePosterItemList);
         adapter.setMovieClickListener(this);
@@ -96,6 +103,12 @@ public class MovieListActivity extends AppCompatActivity
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList(MOVIE_LIST_KEY, moviePosterItemList);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
