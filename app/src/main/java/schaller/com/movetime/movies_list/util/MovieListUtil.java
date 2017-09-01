@@ -17,7 +17,7 @@ public class MovieListUtil {
             = "http://image.tmdb.org/t/p/w185/9Hj2bqi955SvTa5zj7uZs6sic29.jpg";
     private static final String MOCK_POSTER_URL_4
             = "http://image.tmdb.org/t/p/w185/kOLX6JCD0a0CYhha8uwrsPo12Rb.jpg";
-    private static final String MOCK_MOVIE_ID = "mock_id";
+    private static final int MOCK_MOVIE_ID = 123456;
     private static final String MOCK_MOVIE_TITLE = "Inception";
     private static final String MOCK_MOVIE_TITLE_2 = "IT";
     private static final String MOCK_MOVIE_TITLE_3 = "The Grand Budapest Hotel";
@@ -40,11 +40,11 @@ public class MovieListUtil {
     //region helper functions
     private static MoviePosterItem generateMockMovieData(int option) {
         MoviePosterItem item = new MoviePosterItem.Builder()
-                .setMoviePosterUrl(MOCK_POSTER_URL)
-                .setMovieId(MOCK_MOVIE_ID)
-                .setMovieTitle(MOCK_MOVIE_TITLE)
-                .setPopularity((float) Math.random())
-                .setRating((float) Math.random())
+                .setPosterPath(MOCK_POSTER_URL)
+                .setId(MOCK_MOVIE_ID)
+                .setTitle(MOCK_MOVIE_TITLE)
+                .setPopularity(Math.random())
+                .setVoteAverage(Math.random())
                 .build();
 
         switch (option) {
@@ -54,8 +54,8 @@ public class MovieListUtil {
             case 14:
             case 18:
                 return item.newBuilder()
-                        .setMovieTitle(MOCK_MOVIE_TITLE_2)
-                        .setMoviePosterUrl(MOCK_POSTER_URL_2)
+                        .setTitle(MOCK_MOVIE_TITLE_2)
+                        .setPosterPath(MOCK_POSTER_URL_2)
                         .build();
             case 3:
             case 7:
@@ -63,8 +63,8 @@ public class MovieListUtil {
             case 15:
             case 19:
                 return item.newBuilder()
-                        .setMovieTitle(MOCK_MOVIE_TITLE_3)
-                        .setMoviePosterUrl(MOCK_POSTER_URL_3)
+                        .setTitle(MOCK_MOVIE_TITLE_3)
+                        .setPosterPath(MOCK_POSTER_URL_3)
                         .build();
             case 4:
             case 8:
@@ -72,8 +72,8 @@ public class MovieListUtil {
             case 16:
             case 20:
                 return item.newBuilder()
-                        .setMovieTitle(MOCK_MOVIE_TITLE_4)
-                        .setMoviePosterUrl(MOCK_POSTER_URL_4)
+                        .setTitle(MOCK_MOVIE_TITLE_4)
+                        .setPosterPath(MOCK_POSTER_URL_4)
                         .build();
             case 1:
             case 5:

@@ -4,35 +4,299 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.annotations.SerializedName;
+
 import static android.support.v4.util.Preconditions.checkStringNotEmpty;
 
+@SuppressWarnings("unused, WeakerAccess")
 public class MoviePosterItem implements Parcelable {
 
-    private final Builder moviePosterBuilder;
+    private static final String IMAGE_PATH = "http://image.tmdb.org/t/p/w185//%s";
 
-    private MoviePosterItem(@NonNull Builder moviePosterBuilder) {
-        this.moviePosterBuilder = moviePosterBuilder;
+    @SerializedName("adult")
+    private boolean adultContent;
+
+    @SerializedName("backdrop_path")
+    private String backgroundPath;
+
+    @SerializedName("id")
+    private int id;
+
+    @SerializedName("original_language")
+    private String originalLanguage;
+
+    @SerializedName("original_title")
+    private String originalTitle;
+
+    @SerializedName("overview")
+    private String overview;
+
+    @SerializedName("popularity")
+    private double popularity;
+
+    @SerializedName("poster_path")
+    private String posterPath;
+
+    @SerializedName("release_date")
+    private String releaseDateAsString;
+
+    @SerializedName("title")
+    private String title;
+
+    @SerializedName("video")
+    private boolean video;
+
+    @SerializedName("vote_average")
+    private double voteAverage;
+
+    @SerializedName("vote_count")
+    private int voteCount;
+
+    private MoviePosterItem(@NonNull Builder builder) {
+        this.adultContent = builder.adultContent;
+        this.backgroundPath = builder.backgroundPath;
+        this.id = builder.id;
+        this.originalLanguage = builder.originalLanguage;
+        this.originalTitle = builder.originalTitle;
+        this.overview = builder.overview;
+        this.popularity = builder.popularity;
+        this.posterPath = builder.posterPath;
+        this.releaseDateAsString = builder.releaseDateAsString;
+        this.title = builder.title;
+        this.video = builder.video;
+        this.voteAverage = builder.voteAverage;
+        this.voteCount = builder.voteCount;
     }
 
-    public String getMovieId() {
-        return moviePosterBuilder.id;
+    public String getBackgroundPath() {
+        return String.format(IMAGE_PATH, backgroundPath);
     }
 
-    public String getMovieTitle() {
-        return moviePosterBuilder.movieTitle;
+    public int getId() {
+        return id;
     }
 
-    public float getPopularity() {
-        return moviePosterBuilder.popularity;
+    public String getOriginalLanguage() {
+        return originalLanguage;
     }
 
-    public String getPosterUrl() {
-        return moviePosterBuilder.moviePosterUrl;
+    public String getOriginalTitle() {
+        return originalTitle;
     }
 
-    public float getRating() {
-        return moviePosterBuilder.rating;
+    public String getOverview() {
+        return overview;
     }
+
+    public double getPopularity() {
+        return popularity;
+    }
+
+    public String getPosterPath() {
+        return String.format(IMAGE_PATH, posterPath);
+    }
+
+    public String getReleaseDateAsString() {
+        return releaseDateAsString;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public double getVoteAverage() {
+        return voteAverage;
+    }
+
+    public int getVoteCount() {
+        return voteCount;
+    }
+
+    public boolean isAdultContent() {
+        return adultContent;
+    }
+
+    public boolean hasVideo() {
+        return video;
+    }
+
+    public Builder newBuilder() {
+        return new Builder(this);
+    }
+
+    public static MoviePosterItem parseJSON(String response) {
+        Gson gson = new GsonBuilder()
+                .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                .create();
+        return gson.fromJson(response, MoviePosterItem.class);
+    }
+
+    public void setAdultContent(boolean adultContent) {
+        this.adultContent = adultContent;
+    }
+
+    public void setBackgroundPath(@NonNull String backgroundPath) {
+        this.backgroundPath = String.format(IMAGE_PATH, backgroundPath);
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setOriginalLanguage(@NonNull String originalLanguage) {
+        this.originalLanguage = originalLanguage;
+    }
+
+    public void setOriginalTitle(@NonNull String originalTitle) {
+        this.originalTitle = originalTitle;
+    }
+
+    public void setOverview(@NonNull String overview) {
+        this.overview = overview;
+    }
+
+    public void setPopularity(double popularity) {
+        this.popularity = popularity;
+    }
+
+    public void setPosterPath(@NonNull String posterPath) {
+        this.posterPath = String.format(IMAGE_PATH, posterPath);
+    }
+
+    public void setReleaseDateAsString(@NonNull String releaseDateAsString) {
+        this.releaseDateAsString = releaseDateAsString;
+    }
+
+    public void setTitle(@NonNull String title) {
+        this.title = title;
+    }
+
+    public void setVideo(boolean video) {
+        this.video = video;
+    }
+
+    public void setVoteAverage(int voteAverage) {
+        this.voteAverage = voteAverage;
+    }
+
+    public void setVoteCount(int voteCount) {
+        this.voteCount = voteCount;
+    }
+
+    //region Builder
+    public static class Builder {
+
+        private boolean adultContent;
+        private String backgroundPath;
+        private int id;
+        private String originalLanguage;
+        private String originalTitle;
+        private String overview;
+        private double popularity;
+        private String posterPath;
+        private String releaseDateAsString;
+        private String title;
+        private boolean video;
+        private double voteAverage;
+        private int voteCount;
+
+        public Builder() {
+            // no-op
+        }
+
+        private Builder(MoviePosterItem moviePosterItem) {
+            this.adultContent = moviePosterItem.isAdultContent();
+            this.backgroundPath = moviePosterItem.getBackgroundPath();
+            this.id = moviePosterItem.getId();
+            this.originalLanguage = moviePosterItem.getOriginalLanguage();
+            this.originalTitle = moviePosterItem.getOriginalTitle();
+            this.overview = moviePosterItem.getOverview();
+            this.popularity = moviePosterItem.getPopularity();
+            this.posterPath = moviePosterItem.getPosterPath();
+            this.releaseDateAsString = moviePosterItem.getReleaseDateAsString();
+            this.title = moviePosterItem.getTitle();
+            this.video = moviePosterItem.hasVideo();
+            this.voteAverage = moviePosterItem.getVoteAverage();
+            this.voteCount = moviePosterItem.getVoteCount();
+        }
+
+        @SuppressWarnings("RestrictedApi")
+        public MoviePosterItem build() {
+            checkStringNotEmpty(posterPath);
+            checkStringNotEmpty(title);
+            return new MoviePosterItem(this);
+        }
+
+        public Builder setAdultContent(boolean adultContent) {
+            this.adultContent = adultContent;
+            return this;
+        }
+
+        public Builder setBackgroundPath(@NonNull String backgroundPath) {
+            this.backgroundPath = String.format(IMAGE_PATH, backgroundPath);
+            return this;
+        }
+
+        public Builder setId(int id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder setOriginalLanguage(@NonNull String originalLanguage) {
+            this.originalLanguage = originalLanguage;
+            return this;
+        }
+
+        public Builder setOriginalTitle(@NonNull String originalTitle) {
+            this.originalTitle = originalTitle;
+            return this;
+        }
+
+        public Builder setOverview(@NonNull String overview) {
+            this.overview = overview;
+            return this;
+        }
+
+        public Builder setPopularity(double popularity) {
+            this.popularity = popularity;
+            return this;
+        }
+
+        public Builder setPosterPath(@NonNull String posterPath) {
+            this.posterPath = String.format(IMAGE_PATH, posterPath);
+            return this;
+        }
+
+        public Builder setReleaseDateAsString(@NonNull String releaseDateAsString) {
+            this.releaseDateAsString = releaseDateAsString;
+            return this;
+        }
+
+        public Builder setTitle(@NonNull String title) {
+            this.title = title;
+            return this;
+        }
+
+        public Builder setVideo(boolean video) {
+            this.video = video;
+            return this;
+        }
+
+        public Builder setVoteAverage(double voteAverage) {
+            this.voteAverage = voteAverage;
+            return this;
+        }
+
+        public Builder setVoteCount(int voteCount) {
+            this.voteCount = voteCount;
+            return this;
+        }
+
+    }
+    //endregion Builder
 
     //region equals, hashCode, and toString
     @Override
@@ -44,23 +308,60 @@ public class MoviePosterItem implements Parcelable {
             return false;
         }
         MoviePosterItem that = (MoviePosterItem) o;
-        return moviePosterBuilder.equals(that.moviePosterBuilder);
+        return adultContent == that.adultContent
+                && id == that.id
+                && Double.compare(that.popularity, popularity) == 0
+                && video == that.video
+                && voteAverage == that.voteAverage
+                && voteCount == that.voteCount
+                && backgroundPath.equals(that.backgroundPath)
+                && originalLanguage.equals(that.originalLanguage)
+                && originalTitle.equals(that.originalTitle)
+                && overview.equals(that.overview)
+                && posterPath.equals(that.posterPath)
+                && releaseDateAsString.equals(that.releaseDateAsString)
+                && title.equals(that.title);
     }
 
     @Override
     public int hashCode() {
-        return moviePosterBuilder.hashCode();
+        int result;
+        long temp;
+        result = (adultContent ? 1 : 0);
+        result = 31 * result + backgroundPath.hashCode();
+        result = 31 * result + id;
+        result = 31 * result + originalLanguage.hashCode();
+        result = 31 * result + originalTitle.hashCode();
+        result = 31 * result + overview.hashCode();
+        temp = Double.doubleToLongBits(popularity);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        result = 31 * result + posterPath.hashCode();
+        result = 31 * result + releaseDateAsString.hashCode();
+        result = 31 * result + title.hashCode();
+        result = 31 * result + (video ? 1 : 0);
+        temp = Double.doubleToLongBits(voteAverage);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        result = 31 * result + voteCount;
+        return result;
     }
 
     @Override
     public String toString() {
-        return "MoviePosterItem{"
-                + "id=" + moviePosterBuilder.id + ", "
-                + "moviePosterUrl=" + moviePosterBuilder.moviePosterUrl + ", "
-                + "popularity=" + moviePosterBuilder.popularity + ", "
-                + "rating=" + moviePosterBuilder.rating + ", "
-                + "title=" + moviePosterBuilder.movieTitle
-                + '}';
+        return "MoviePosterItem{" +
+                "adultContent=" + adultContent +
+                ", backgroundPath='" + backgroundPath + '\'' +
+                ", id=" + id +
+                ", originalLanguage='" + originalLanguage + '\'' +
+                ", originalTitle='" + originalTitle + '\'' +
+                ", overview='" + overview + '\'' +
+                ", popularity=" + popularity +
+                ", posterPath='" + posterPath + '\'' +
+                ", releaseDateAsString='" + releaseDateAsString + '\'' +
+                ", title='" + title + '\'' +
+                ", video=" + video +
+                ", voteAverage=" + voteAverage +
+                ", voteCount=" + voteCount +
+                '}';
     }
     //endregion equals, hashCode, and toString
 
@@ -72,11 +373,35 @@ public class MoviePosterItem implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeParcelable(this.moviePosterBuilder, flags);
+        dest.writeByte(this.adultContent ? (byte) 1 : (byte) 0);
+        dest.writeString(this.backgroundPath);
+        dest.writeInt(this.id);
+        dest.writeString(this.originalLanguage);
+        dest.writeString(this.originalTitle);
+        dest.writeString(this.overview);
+        dest.writeDouble(this.popularity);
+        dest.writeString(this.posterPath);
+        dest.writeString(this.releaseDateAsString);
+        dest.writeString(this.title);
+        dest.writeByte(this.video ? (byte) 1 : (byte) 0);
+        dest.writeDouble(this.voteAverage);
+        dest.writeInt(this.voteCount);
     }
 
-    protected MoviePosterItem(Parcel in) {
-        this.moviePosterBuilder = in.readParcelable(Builder.class.getClassLoader());
+    private MoviePosterItem(Parcel in) {
+        this.adultContent = in.readByte() != 0;
+        this.backgroundPath = in.readString();
+        this.id = in.readInt();
+        this.originalLanguage = in.readString();
+        this.originalTitle = in.readString();
+        this.overview = in.readString();
+        this.popularity = in.readDouble();
+        this.posterPath = in.readString();
+        this.releaseDateAsString = in.readString();
+        this.title = in.readString();
+        this.video = in.readByte() != 0;
+        this.voteAverage = in.readDouble();
+        this.voteCount = in.readInt();
     }
 
     public static final Creator<MoviePosterItem> CREATOR = new Creator<MoviePosterItem>() {
@@ -91,135 +416,5 @@ public class MoviePosterItem implements Parcelable {
         }
     };
     //endregion Parcelable
-
-    public Builder newBuilder() {
-        return new Builder(this);
-    }
-
-    public static class Builder implements Parcelable {
-
-        private String id;
-        private String moviePosterUrl;
-        private String movieTitle;
-        private float popularity;
-        private float rating;
-
-        public Builder() {
-            // no-op
-        }
-
-        private Builder(MoviePosterItem moviePosterItem) {
-            this.id = moviePosterItem.getMovieId();
-            this.movieTitle = moviePosterItem.getMovieTitle();
-            this.moviePosterUrl = moviePosterItem.getPosterUrl();
-            this.popularity = moviePosterItem.getPopularity();
-            this.rating = moviePosterItem.getRating();
-        }
-
-        public Builder setMovieId(@NonNull String movieId) {
-            this.id = movieId;
-            return this;
-        }
-
-        public Builder setMoviePosterUrl(@NonNull String moviePosterUrl) {
-            this.moviePosterUrl = moviePosterUrl;
-            return this;
-        }
-
-        public Builder setMovieTitle(@NonNull String movieTitle) {
-            this.movieTitle = movieTitle;
-            return this;
-        }
-
-        public Builder setPopularity(float popularity) {
-            this.popularity = popularity;
-            return this;
-        }
-
-        public Builder setRating(float rating) {
-            this.rating = rating;
-            return this;
-        }
-
-        @SuppressWarnings("RestrictedApi")
-        public MoviePosterItem build() {
-            checkStringNotEmpty(id);
-            checkStringNotEmpty(movieTitle);
-            checkStringNotEmpty(moviePosterUrl);
-            return new MoviePosterItem(this);
-        }
-
-        //region equals & hashcode
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            Builder builder = (Builder) o;
-            if (Float.compare(builder.popularity, popularity) != 0) {
-                return false;
-            }
-            if (Float.compare(builder.rating, rating) != 0) {
-                return false;
-            }
-            if (!id.equals(builder.id)) {
-                return false;
-            }
-            if (!moviePosterUrl.equals(builder.moviePosterUrl)) {
-                return false;
-            }
-            return movieTitle.equals(builder.movieTitle);
-        }
-
-        @Override
-        public int hashCode() {
-            int result = id.hashCode();
-            result = 31 * result + moviePosterUrl.hashCode();
-            result = 31 * result + movieTitle.hashCode();
-            result = 31 * result + (popularity != +0.0f ? Float.floatToIntBits(popularity) : 0);
-            result = 31 * result + (rating != +0.0f ? Float.floatToIntBits(rating) : 0);
-            return result;
-        }
-        //endregion equals & hashcode
-
-        //region Parcelable
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeString(this.id);
-            dest.writeString(this.moviePosterUrl);
-            dest.writeString(this.movieTitle);
-            dest.writeFloat(this.popularity);
-            dest.writeFloat(this.rating);
-        }
-
-        protected Builder(Parcel in) {
-            this.id = in.readString();
-            this.moviePosterUrl = in.readString();
-            this.movieTitle = in.readString();
-            this.popularity = in.readFloat();
-            this.rating = in.readFloat();
-        }
-
-        public static final Creator<Builder> CREATOR = new Creator<Builder>() {
-            @Override
-            public Builder createFromParcel(Parcel source) {
-                return new Builder(source);
-            }
-
-            @Override
-            public Builder[] newArray(int size) {
-                return new Builder[size];
-            }
-        };
-        //endregion Parcelable
-    }
 
 }

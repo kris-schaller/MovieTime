@@ -93,8 +93,8 @@ public class MovieListActivity extends AppCompatActivity
                 Collections.sort(moviePosterItemList, new Comparator<MoviePosterItem>() {
                     @Override
                     public int compare(MoviePosterItem o1, MoviePosterItem o2) {
-                        return o1.getRating() < o2.getRating() ? -1
-                                : o1.getRating() > o2.getRating() ? 1
+                        return o1.getVoteAverage() < o2.getVoteAverage() ? -1
+                                : o1.getVoteAverage() > o2.getVoteAverage() ? 1
                                         : 0;
                     }
                 });
@@ -122,7 +122,7 @@ public class MovieListActivity extends AppCompatActivity
     //region OnMovieClickListener
     @Override
     public void onMovieClick(@NonNull MoviePosterItem moviePosterItem) {
-        Toast.makeText(this, moviePosterItem.getMovieTitle(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, moviePosterItem.getTitle(), Toast.LENGTH_SHORT).show();
     }
     //endregion OnMovieClickListener
 

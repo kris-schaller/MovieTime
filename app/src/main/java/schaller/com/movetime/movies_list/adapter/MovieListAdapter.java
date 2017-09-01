@@ -95,7 +95,7 @@ public class MovieListAdapter extends ProgressAdapter<MoviePosterItem> {
                                            int position) {
         final MoviePosterItem moviePosterItem = moviePosterItems.get(position);
 
-        holder.posterTitleView.setText(moviePosterItem.getMovieTitle());
+        holder.posterTitleView.setText(moviePosterItem.getTitle());
         TextViewCompat.setAutoSizeTextTypeWithDefaults(
                 holder.posterTitleView,
                 TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM);
@@ -103,7 +103,7 @@ public class MovieListAdapter extends ProgressAdapter<MoviePosterItem> {
         // Cancel previous on-going requests for this view before attempted to load again
         Picasso.with(holder.imageView.getContext()).cancelRequest(holder.imageView);
         Picasso.with(holder.imageView.getContext())
-                .load(moviePosterItem.getPosterUrl())
+                .load(moviePosterItem.getPosterPath())
                 .centerInside()
                 .fit()
                 .placeholder(R.drawable.poster_image_placeholder)
