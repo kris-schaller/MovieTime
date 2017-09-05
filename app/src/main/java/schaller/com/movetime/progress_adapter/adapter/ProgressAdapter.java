@@ -44,7 +44,6 @@ public abstract class ProgressAdapter<T> extends RecyclerView.Adapter<RecyclerVi
     }
 
     private RecyclerView.LayoutManager layoutManager;
-    private boolean loading = false;
 
     public ProgressAdapter(@NonNull LinearLayoutManager layoutManager) {
         this.layoutManager = layoutManager;
@@ -100,28 +99,29 @@ public abstract class ProgressAdapter<T> extends RecyclerView.Adapter<RecyclerVi
     }
 
     /**
-     * Return the list of items stored in the adapter.
+     * Return the list of items stored in the adapter. Once this is called be sure to notify the
+     * adapter that the list items have changed.
      *
      * @return {@link List<T>} where {@link T} is the object type contained in the list
      */
     public abstract List<T> getItems();
 
-    public void showLoadingIndicator(boolean show) {
-        // Prevent loading if we're already in a loading state
-        if (loading && show) {
-            return;
-        }
-        loading = show;
+    protected void hideLoadingIndicator() {
+        List<T> items = getItems();
         int size = getItems().size() - 1;
-        if (show) {
-            // Adding null to the list indicates during lookup that it should be treated as a
-            // progress item
+        if (!items.isEmpty() && items.get(getItems().size() - 1) == null) {
+            getItems().remove(size);
+            notifyItemRemoved(size);
+        }
+    }
+
+    protected void showLoadingIndicator() {
+        List<T> items = getItems();
+        int size = getItems().size() - 1;
+        if (!items.isEmpty() && items.get(getItems().size() - 1) != null) {
             getItems().add(null);
             notifyItemInserted(size);
-            return;
         }
-        getItems().remove(size);
-        notifyItemRemoved(size);
     }
 
     //region ViewHolder
