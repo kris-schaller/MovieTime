@@ -30,6 +30,7 @@ public class MovieListActivity extends AppCompatActivity
         EndlessOnScrollListener.OnLoadMoreListener {
 
     private static final String MOVIE_LIST_KEY = "movie_list_key";
+    private static final String LAST_LOADED_PAGE_KEY = "last_loaded_page_key";
 
     // Suppress these warnings so we can make these requests static to avoid memory leaks
     @SuppressWarnings("FieldCanBeLocal")
@@ -39,6 +40,7 @@ public class MovieListActivity extends AppCompatActivity
 
     private ArrayList<MoviePosterItem> moviePosterItemList = new ArrayList<>();
     private MovieListAdapter adapter;
+    private int currentPage = 1;
     private StaggeredGridAutoFitLayoutManager staggeredGridAutoFitLayoutManager;
     private EndlessOnScrollListener endlessOnScrollListener;
 
@@ -68,6 +70,9 @@ public class MovieListActivity extends AppCompatActivity
                 staggeredGridAutoFitLayoutManager,
                 this);
 
+        if (savedInstanceState != null && savedInstanceState.containsKey(LAST_LOADED_PAGE_KEY)) {
+            currentPage = savedInstanceState.getInt(LAST_LOADED_PAGE_KEY);
+        }
         recyclerView.setLayoutManager(staggeredGridAutoFitLayoutManager);
         recyclerView.addOnScrollListener(endlessOnScrollListener);
         recyclerView.setAdapter(adapter);
@@ -140,6 +145,7 @@ public class MovieListActivity extends AppCompatActivity
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putParcelableArrayList(MOVIE_LIST_KEY, moviePosterItemList);
+        outState.putInt(LAST_LOADED_PAGE_KEY, currentPage);
         super.onSaveInstanceState(outState);
     }
 
@@ -160,8 +166,8 @@ public class MovieListActivity extends AppCompatActivity
 
     //region OnLoadMoreListener
     @Override
-    public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
-        String[] pageParams = {LoadMoviesAsyncTask.PAGE_QUERY_KEY, String.valueOf(page)};
+    public void onLoadMore(int totalItemsCount, RecyclerView view) {
+        String[] pageParams = {LoadMoviesAsyncTask.PAGE_QUERY_KEY, String.valueOf(currentPage)};
         loadMoviePageRequest = new LoadMoviesAsyncTask(
                 new LoadMoviesAsyncTask.OnLoadMovieSummaryCallback() {
                     @Override
@@ -198,6 +204,7 @@ public class MovieListActivity extends AppCompatActivity
     private void onInitialMovieLoadSuccess(@NonNull MovieSummaryItem movieSummaryItem) {
         moviePosterItemList.addAll(movieSummaryItem.getMoviePosterItems());
         adapter.setMoviePosterItems(moviePosterItemList);
+        currentPage++;
         recyclerView.addOnScrollListener(endlessOnScrollListener);
     }
 
@@ -212,6 +219,7 @@ public class MovieListActivity extends AppCompatActivity
     private void onMoviePageLoadSuccess(@NonNull MovieSummaryItem movieSummaryItem) {
         moviePosterItemList.addAll(movieSummaryItem.getMoviePosterItems());
         adapter.setMoviePosterItems(moviePosterItemList);
+        currentPage++;
         recyclerView.addOnScrollListener(endlessOnScrollListener);
     }
     //endregion network request helpers

@@ -1,11 +1,15 @@
 package schaller.com.movetime.scroll_listener;
 
+import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Will notify any listeners implementing {@link OnLoadMoreListener} that the list has passed the
@@ -16,24 +20,16 @@ public class EndlessOnScrollListener extends RecyclerView.OnScrollListener {
     // The minimum amount of items to have below your current scroll position
     // before loading more.
     private static final int VISIBLE_THRESHOLD = 5;
-    // Sets the starting page index
-    private static final int STARTING_PAGE_INDEX = 0;
-
 
     // Threshold based on number of spans
     private int visibleThreshold = VISIBLE_THRESHOLD;
-    // The current offset index of data you have loaded
-    private int currentPage = 0;
-    // The total number of items in the data set after the last load
-    private int previousTotalItemCount = 0;
-    // True if we are still waiting for the last set of data to load.
-    private boolean loading = true;
+
     private OnLoadMoreListener listener;
     private RecyclerView.LayoutManager mLayoutManager;
 
     public interface OnLoadMoreListener {
 
-        void onLoadMore(int page, int totalItemsCount, RecyclerView view);
+        void onLoadMore(int totalItemsCount, RecyclerView view);
 
     }
 
@@ -46,14 +42,14 @@ public class EndlessOnScrollListener extends RecyclerView.OnScrollListener {
     public EndlessOnScrollListener(@NonNull GridLayoutManager layoutManager,
                                    @Nullable OnLoadMoreListener listener) {
         this.mLayoutManager = layoutManager;
-        visibleThreshold = visibleThreshold * layoutManager.getSpanCount();
+        this.visibleThreshold = visibleThreshold * layoutManager.getSpanCount();
         this.listener = listener;
     }
 
     public EndlessOnScrollListener(@NonNull StaggeredGridLayoutManager layoutManager,
                                    @Nullable OnLoadMoreListener listener) {
         this.mLayoutManager = layoutManager;
-        visibleThreshold = visibleThreshold * layoutManager.getSpanCount();
+        this.visibleThreshold = visibleThreshold * layoutManager.getSpanCount();
         this.listener = listener;
     }
 
@@ -62,7 +58,13 @@ public class EndlessOnScrollListener extends RecyclerView.OnScrollListener {
     // but first we check if we are waiting for the previous load to finish.
     @Override
     public void onScrolled(RecyclerView view, int dx, int dy) {
+        // If we're current loading or not advancing the list ignore any events
+        if (dx <= 0 && dy <= 0) {
+            return;
+        }
+
         int lastVisibleItemPosition = 0;
+        visibleThreshold = VISIBLE_THRESHOLD;
         int totalItemCount = mLayoutManager.getItemCount();
 
         if (mLayoutManager instanceof StaggeredGridLayoutManager) {
@@ -78,35 +80,25 @@ public class EndlessOnScrollListener extends RecyclerView.OnScrollListener {
                     .findLastVisibleItemPosition();
         }
 
-        // If the total item count is zero and the previous isn't, assume the
-        // list is invalidated and should be reset back to initial state
-        if (totalItemCount < previousTotalItemCount) {
-            this.currentPage = STARTING_PAGE_INDEX;
-            this.previousTotalItemCount = totalItemCount;
-            if (totalItemCount == 0) {
-                this.loading = true;
-            }
-        }
-        // If it’s still loading, we check to see if the data set count has
-        // changed, if so we conclude it has finished loading and update the current page
-        // number and total item count.
-        if (loading && (totalItemCount > previousTotalItemCount)) {
-            loading = false;
-            previousTotalItemCount = totalItemCount;
-        }
-
         // If it isn’t currently loading, we check to see if we have breached
         // the visibleThreshold and need to reload more data.
         // If we do need to reload some more data, we execute onLoadMore to fetch the data.
         // threshold should reflect how many total columns there are too
-        if (!loading && (lastVisibleItemPosition + visibleThreshold) > totalItemCount) {
-            currentPage++;
-            listener.onLoadMore(currentPage, totalItemCount, view);
-            loading = true;
+        if ((lastVisibleItemPosition + visibleThreshold) >= totalItemCount) {
+            listener.onLoadMore(totalItemCount, view);
         }
     }
 
-    public int getLastVisibleItem(int[] lastVisibleItemPositions) {
+    public void setOnLoadMoreListener(@Nullable OnLoadMoreListener listener) {
+        this.listener = listener;
+    }
+
+    public void setVisibleThreshold(int visibleThreshold) {
+        this.visibleThreshold = visibleThreshold;
+    }
+
+    //region helper function
+    private int getLastVisibleItem(int[] lastVisibleItemPositions) {
         int maxSize = 0;
         for (int i = 0; i < lastVisibleItemPositions.length; i++) {
             if (i == 0) {
@@ -117,18 +109,10 @@ public class EndlessOnScrollListener extends RecyclerView.OnScrollListener {
                 maxSize = lastVisibleItemPositions[i];
             }
         }
-        return maxSize;
+        // Because we're grabbing the position, but comparing it to size we need to add an offset of
+        // 1 because of the 0 starting index
+        return maxSize + 1;
     }
-
-    // Call this method whenever performing new searches
-    public void resetState() {
-        this.currentPage = STARTING_PAGE_INDEX;
-        this.previousTotalItemCount = 0;
-        this.loading = true;
-    }
-
-    public void setOnLoadMoreListener(@Nullable OnLoadMoreListener listener) {
-        this.listener = listener;
-    }
+    //endregion helper functions
 
 }
