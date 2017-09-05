@@ -91,6 +91,19 @@ public class MovieListAdapter extends ProgressAdapter<MoviePosterItem> {
         diffResult.dispatchUpdatesTo(this);
     }
 
+
+    public void setMoviePosterItemsLoading(@NonNull List<MoviePosterItem> moviePosterItems) {
+        // We don't need to call the hide loading indicator callback here because the DiffUtil
+        // will remove it since it's not included in the new list
+        final MoviePosterDiffUtilCallback callback = new MoviePosterDiffUtilCallback(
+                this.moviePosterItems, moviePosterItems);
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(callback);
+        this.moviePosterItems.clear();
+        this.moviePosterItems.addAll(moviePosterItems);
+        showLoadingIndicator();
+        diffResult.dispatchUpdatesTo(this);
+    }
+
     private void bindMoviePosterViewHolder(@NonNull final MoviePosterViewHolder holder,
                                            int position) {
         final MoviePosterItem moviePosterItem = moviePosterItems.get(position);

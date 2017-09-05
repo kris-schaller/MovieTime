@@ -63,7 +63,7 @@ public class MovieListActivity extends AppCompatActivity
         if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_LIST_KEY)) {
             moviePosterItemList = savedInstanceState.getParcelableArrayList(MOVIE_LIST_KEY);
             //noinspection ConstantConditions
-            adapter.setMoviePosterItems(moviePosterItemList);
+            adapter.setMoviePosterItemsLoading(moviePosterItemList);
         }
 
         endlessOnScrollListener = new EndlessOnScrollListener(
@@ -124,7 +124,7 @@ public class MovieListActivity extends AppCompatActivity
                                         : 0;
                     }
                 });
-                adapter.setMoviePosterItems(moviePosterItemList);
+                adapter.setMoviePosterItemsLoading(moviePosterItemList);
                 return true;
             case R.id.sort_by_rating_action:
                 Collections.sort(moviePosterItemList, new Comparator<MoviePosterItem>() {
@@ -135,7 +135,7 @@ public class MovieListActivity extends AppCompatActivity
                                         : 0;
                     }
                 });
-                adapter.setMoviePosterItems(moviePosterItemList);
+                adapter.setMoviePosterItemsLoading(moviePosterItemList);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -203,8 +203,12 @@ public class MovieListActivity extends AppCompatActivity
 
     private void onInitialMovieLoadSuccess(@NonNull MovieSummaryItem movieSummaryItem) {
         moviePosterItemList.addAll(movieSummaryItem.getMoviePosterItems());
-        adapter.setMoviePosterItems(moviePosterItemList);
-        currentPage++;
+        if (currentPage >= movieSummaryItem.getTotalPages()) {
+            adapter.setMoviePosterItems(moviePosterItemList);
+        } else {
+            adapter.setMoviePosterItemsLoading(moviePosterItemList);
+            currentPage++;
+        }
         recyclerView.addOnScrollListener(endlessOnScrollListener);
     }
 
@@ -218,8 +222,12 @@ public class MovieListActivity extends AppCompatActivity
 
     private void onMoviePageLoadSuccess(@NonNull MovieSummaryItem movieSummaryItem) {
         moviePosterItemList.addAll(movieSummaryItem.getMoviePosterItems());
-        adapter.setMoviePosterItems(moviePosterItemList);
-        currentPage++;
+        if (currentPage >= movieSummaryItem.getTotalPages()) {
+            adapter.setMoviePosterItems(moviePosterItemList);
+        } else {
+            adapter.setMoviePosterItemsLoading(moviePosterItemList);
+            currentPage++;
+        }
         recyclerView.addOnScrollListener(endlessOnScrollListener);
     }
     //endregion network request helpers
