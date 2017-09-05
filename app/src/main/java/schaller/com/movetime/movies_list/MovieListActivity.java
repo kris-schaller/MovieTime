@@ -1,7 +1,6 @@
 package schaller.com.movetime.movies_list;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -21,7 +20,9 @@ import schaller.com.movetime.R;
 import schaller.com.movetime.layout_manager.StaggeredGridAutoFitLayoutManager;
 import schaller.com.movetime.movies_list.adapter.MovieListAdapter;
 import schaller.com.movetime.movies_list.models.MoviePosterItem;
-import schaller.com.movetime.movies_list.util.MovieListUtil;
+import schaller.com.movetime.movies_list.models.MovieSummaryItem;
+import schaller.com.movetime.movies_list.models.MovieSummaryResponse;
+import schaller.com.movetime.movies_list.networking.LoadMoviesAsyncTask;
 import schaller.com.movetime.scroll_listener.EndlessOnScrollListener;
 
 public class MovieListActivity extends AppCompatActivity
@@ -30,11 +31,16 @@ public class MovieListActivity extends AppCompatActivity
 
     private static final String MOVIE_LIST_KEY = "movie_list_key";
 
+    // Suppress these warnings so we can make these requests static to avoid memory leaks
+    @SuppressWarnings("FieldCanBeLocal")
+    private static LoadMoviesAsyncTask loadMovieInitialListRequest;
+    @SuppressWarnings("FieldCanBeLocal")
+    private static LoadMoviesAsyncTask loadMoviePageRequest;
+
     private ArrayList<MoviePosterItem> moviePosterItemList = new ArrayList<>();
     private MovieListAdapter adapter;
     private StaggeredGridAutoFitLayoutManager staggeredGridAutoFitLayoutManager;
     private EndlessOnScrollListener endlessOnScrollListener;
-    private Handler handler = new Handler();
 
     @BindView(R.id.movie_list) RecyclerView recyclerView;
 
@@ -49,16 +55,14 @@ public class MovieListActivity extends AppCompatActivity
                 StaggeredGridLayoutManager.VERTICAL,
                 Math.round(getResources().getDimension(R.dimen.list_poster_width)));
 
-        if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_LIST_KEY)) {
-            //noinspection unchecked
-            moviePosterItemList = (ArrayList<MoviePosterItem>) savedInstanceState
-                    .get(MOVIE_LIST_KEY);
-        } else {
-            moviePosterItemList.addAll(MovieListUtil.generateMockMovieDataList(10));
-        }
         adapter = new MovieListAdapter(staggeredGridAutoFitLayoutManager);
-        adapter.setMoviePosterItems(moviePosterItemList);
         adapter.setMovieClickListener(this);
+
+        if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_LIST_KEY)) {
+            moviePosterItemList = savedInstanceState.getParcelableArrayList(MOVIE_LIST_KEY);
+            //noinspection ConstantConditions
+            adapter.setMoviePosterItems(moviePosterItemList);
+        }
 
         endlessOnScrollListener = new EndlessOnScrollListener(
                 staggeredGridAutoFitLayoutManager,
@@ -67,6 +71,34 @@ public class MovieListActivity extends AppCompatActivity
         recyclerView.setLayoutManager(staggeredGridAutoFitLayoutManager);
         recyclerView.addOnScrollListener(endlessOnScrollListener);
         recyclerView.setAdapter(adapter);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (!moviePosterItemList.isEmpty()) {
+            return;
+        }
+        loadMovieInitialListRequest = new LoadMoviesAsyncTask(
+                new LoadMoviesAsyncTask.OnLoadMovieSummaryCallback() {
+                    @Override
+                    public void onPreExecuteLoadMovieSummary() {
+                        onInitialMoviePreLoad();
+                    }
+
+                    @Override
+                    public void onPostExecuteLoadMovieSummary(
+                            MovieSummaryResponse movieSummaryResponse) {
+                        if (movieSummaryResponse.getResponseStatus()
+                                == MovieSummaryResponse.ResponseStatus.ERROR) {
+                            onInitialMovieLoadError();
+                            return;
+                        }
+                        //noinspection OptionalGetWithoutIsPresent
+                        onInitialMovieLoadSuccess(movieSummaryResponse.getMovieSummaryItem().get());
+                    }
+                });
+        loadMovieInitialListRequest.execute();
     }
 
     @Override
@@ -129,23 +161,59 @@ public class MovieListActivity extends AppCompatActivity
     //region OnLoadMoreListener
     @Override
     public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
-        // These need to be posted on the same thread so we avoid race conditions causing the
-        // loading indicator/items to not display
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                adapter.showLoadingIndicator(true);
-            }
-        });
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                moviePosterItemList.addAll(MovieListUtil.generateMockMovieDataList(10));
-                adapter.setMoviePosterItems(moviePosterItemList);
-                adapter.showLoadingIndicator(false);
-            }
-        }, 5000);
+        String[] pageParams = {LoadMoviesAsyncTask.PAGE_QUERY_KEY, String.valueOf(page)};
+        loadMoviePageRequest = new LoadMoviesAsyncTask(
+                new LoadMoviesAsyncTask.OnLoadMovieSummaryCallback() {
+                    @Override
+                    public void onPreExecuteLoadMovieSummary() {
+                        onMoviePagePreLoad();
+                    }
+
+                    @Override
+                    public void onPostExecuteLoadMovieSummary(
+                            MovieSummaryResponse movieSummaryResponse) {
+                        if (movieSummaryResponse.getResponseStatus()
+                                == MovieSummaryResponse.ResponseStatus.ERROR) {
+                            onMoviePageLoadError();
+                            return;
+                        }
+                        //noinspection OptionalGetWithoutIsPresent
+                        onMoviePageLoadSuccess(movieSummaryResponse.getMovieSummaryItem().get());
+                    }
+                });
+
+        loadMoviePageRequest.execute(pageParams);
     }
     //endregion OnLoadMoreListener
+
+    //region network request helpers
+    private void onInitialMovieLoadError() {
+        recyclerView.addOnScrollListener(endlessOnScrollListener);
+    }
+
+    private void onInitialMoviePreLoad() {
+        recyclerView.removeOnScrollListener(endlessOnScrollListener);
+    }
+
+    private void onInitialMovieLoadSuccess(@NonNull MovieSummaryItem movieSummaryItem) {
+        moviePosterItemList.addAll(movieSummaryItem.getMoviePosterItems());
+        adapter.setMoviePosterItems(moviePosterItemList);
+        recyclerView.addOnScrollListener(endlessOnScrollListener);
+    }
+
+    private void onMoviePageLoadError() {
+        recyclerView.addOnScrollListener(endlessOnScrollListener);
+    }
+
+    private void onMoviePagePreLoad() {
+        recyclerView.removeOnScrollListener(endlessOnScrollListener);
+    }
+
+    private void onMoviePageLoadSuccess(@NonNull MovieSummaryItem movieSummaryItem) {
+        moviePosterItemList.addAll(movieSummaryItem.getMoviePosterItems());
+        adapter.setMoviePosterItems(moviePosterItemList);
+        recyclerView.addOnScrollListener(endlessOnScrollListener);
+    }
+    //endregion network request helpers
 
 }
