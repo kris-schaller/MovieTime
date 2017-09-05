@@ -225,7 +225,12 @@ public class MoviePosterItem implements Parcelable {
 
         @SuppressWarnings("RestrictedApi")
         public MoviePosterItem build() {
+            checkStringNotEmpty(backgroundPath);
+            checkStringNotEmpty(originalLanguage);
+            checkStringNotEmpty(originalTitle);
+            checkStringNotEmpty(overview);
             checkStringNotEmpty(posterPath);
+            checkStringNotEmpty(releaseDateAsString);
             checkStringNotEmpty(title);
             return new MoviePosterItem(this);
         }
