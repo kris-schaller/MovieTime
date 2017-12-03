@@ -42,6 +42,10 @@ public class MovieListActivity extends AppCompatActivity
     private static LoadMoviesAsyncTask loadMovieInitialListRequest;
     @SuppressWarnings("FieldCanBeLocal")
     private static LoadMoviesAsyncTask loadMoviePageRequest;
+    @SuppressWarnings("FieldCanBeLocal")
+    private static LoadMoviesAsyncTask loadPopularMovieListRequest;
+    @SuppressWarnings("FieldCanBeLocal")
+    private static LoadMoviesAsyncTask loadTopRatedMovieListRequest;
 
     private ArrayList<MoviePosterItem> moviePosterItemList = new ArrayList<>();
     private MovieListAdapter adapter;
@@ -114,6 +118,10 @@ public class MovieListActivity extends AppCompatActivity
                     }
                 });
                 adapter.setMoviePosterItemsLoading(moviePosterItemList);
+                // TODO This is the network request required to complete the project, but it's
+                // TODO unnecessary since the value is included in the object response & you lose
+                // TODO the animation for sorting.
+                // loadPopularMovieList();
                 return true;
             case R.id.sort_by_rating_action:
                 Collections.sort(moviePosterItemList, new Comparator<MoviePosterItem>() {
@@ -125,6 +133,10 @@ public class MovieListActivity extends AppCompatActivity
                     }
                 });
                 adapter.setMoviePosterItemsLoading(moviePosterItemList);
+                // TODO This is the network request required to complete the project, but it's
+                // TODO unnecessary since the value is included in the object response & you lose
+                // TODO the animation for sorting.
+                // loadTopRatedMovieList();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -253,6 +265,54 @@ public class MovieListActivity extends AppCompatActivity
                     }
                 });
         loadMovieInitialListRequest.execute();
+    }
+
+    private void loadPopularMovieList() {
+        String[] pageParams = {LoadMoviesAsyncTask.SORT_BY, LoadMoviesAsyncTask.POPULARITY};
+        loadPopularMovieListRequest = new LoadMoviesAsyncTask(
+                new LoadMoviesAsyncTask.OnLoadMovieSummaryCallback() {
+                    @Override
+                    public void onPreExecuteLoadMovieSummary() {
+                        onInitialMoviePreLoad();
+                    }
+
+                    @Override
+                    public void onPostExecuteLoadMovieSummary(
+                            MovieSummaryResponse movieSummaryResponse) {
+                        if (movieSummaryResponse.getResponseStatus()
+                                == MovieSummaryResponse.ResponseStatus.ERROR) {
+                            onInitialMovieLoadError();
+                            return;
+                        }
+                        //noinspection OptionalGetWithoutIsPresent
+                        onInitialMovieLoadSuccess(movieSummaryResponse.getMovieSummaryItem().get());
+                    }
+                });
+        loadPopularMovieListRequest.execute(pageParams);
+    }
+
+    private void loadTopRatedMovieList() {
+        String[] pageParams = {LoadMoviesAsyncTask.SORT_BY, LoadMoviesAsyncTask.VOTE_AVG};
+        loadTopRatedMovieListRequest = new LoadMoviesAsyncTask(
+                new LoadMoviesAsyncTask.OnLoadMovieSummaryCallback() {
+                    @Override
+                    public void onPreExecuteLoadMovieSummary() {
+                        onInitialMoviePreLoad();
+                    }
+
+                    @Override
+                    public void onPostExecuteLoadMovieSummary(
+                            MovieSummaryResponse movieSummaryResponse) {
+                        if (movieSummaryResponse.getResponseStatus()
+                                == MovieSummaryResponse.ResponseStatus.ERROR) {
+                            onInitialMovieLoadError();
+                            return;
+                        }
+                        //noinspection OptionalGetWithoutIsPresent
+                        onInitialMovieLoadSuccess(movieSummaryResponse.getMovieSummaryItem().get());
+                    }
+                });
+        loadTopRatedMovieListRequest.execute(pageParams);
     }
 
     @OnClick(R.id.list_retry_button)
