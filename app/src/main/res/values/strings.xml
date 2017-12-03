@@ -2,6 +2,8 @@
     <string name="app_name">MoveTime</string>
 
     <!-- Move List -->
+    <string name="error_loading_list_text">Error loading movie titles</string>
+    <string name="retry">Retry</string>
     <string name="sort_by_popularity">Sort By Popularity</string>
     <string name="sort_by_rating">Sort By Rating</string>
 </resources>

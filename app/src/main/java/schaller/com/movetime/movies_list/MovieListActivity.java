@@ -4,10 +4,13 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -16,6 +19,7 @@ import java.util.Comparator;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import schaller.com.movetime.R;
 import schaller.com.movetime.layout_manager.StaggeredGridAutoFitLayoutManager;
 import schaller.com.movetime.movies_list.adapter.MovieListAdapter;
@@ -24,6 +28,7 @@ import schaller.com.movetime.movies_list.models.MovieSummaryItem;
 import schaller.com.movetime.movies_list.models.MovieSummaryResponse;
 import schaller.com.movetime.movies_list.networking.LoadMoviesAsyncTask;
 import schaller.com.movetime.scroll_listener.EndlessOnScrollListener;
+import schaller.com.movetime.view.ProgressErrorView;
 
 public class MovieListActivity extends AppCompatActivity
         implements MovieListAdapter.OnMovieClickListener,
@@ -44,6 +49,9 @@ public class MovieListActivity extends AppCompatActivity
     private StaggeredGridAutoFitLayoutManager staggeredGridAutoFitLayoutManager;
     private EndlessOnScrollListener endlessOnScrollListener;
 
+    @BindView(R.id.movie_list_error_text) TextView errorText;
+    @BindView(R.id.list_retry_button) AppCompatButton retryImage;
+    @BindView(R.id.movie_list_progress_bar) ProgressErrorView progressErrorView;
     @BindView(R.id.movie_list) RecyclerView recyclerView;
 
     @Override
@@ -84,26 +92,7 @@ public class MovieListActivity extends AppCompatActivity
         if (!moviePosterItemList.isEmpty()) {
             return;
         }
-        loadMovieInitialListRequest = new LoadMoviesAsyncTask(
-                new LoadMoviesAsyncTask.OnLoadMovieSummaryCallback() {
-                    @Override
-                    public void onPreExecuteLoadMovieSummary() {
-                        onInitialMoviePreLoad();
-                    }
-
-                    @Override
-                    public void onPostExecuteLoadMovieSummary(
-                            MovieSummaryResponse movieSummaryResponse) {
-                        if (movieSummaryResponse.getResponseStatus()
-                                == MovieSummaryResponse.ResponseStatus.ERROR) {
-                            onInitialMovieLoadError();
-                            return;
-                        }
-                        //noinspection OptionalGetWithoutIsPresent
-                        onInitialMovieLoadSuccess(movieSummaryResponse.getMovieSummaryItem().get());
-                    }
-                });
-        loadMovieInitialListRequest.execute();
+        loadInitialMovieList();
     }
 
     @Override
@@ -194,15 +183,26 @@ public class MovieListActivity extends AppCompatActivity
 
     //region network request helpers
     private void onInitialMovieLoadError() {
-        recyclerView.addOnScrollListener(endlessOnScrollListener);
+        progressErrorView.setVisibility(View.VISIBLE);
+        progressErrorView.showError();
+        recyclerView.setVisibility(View.GONE);
+        errorText.setVisibility(View.VISIBLE);
+        retryImage.setVisibility(View.VISIBLE);
     }
 
     private void onInitialMoviePreLoad() {
+        progressErrorView.setVisibility(View.VISIBLE);
         recyclerView.removeOnScrollListener(endlessOnScrollListener);
+        recyclerView.setVisibility(View.GONE);
+        errorText.setVisibility(View.GONE);
+        retryImage.setVisibility(View.GONE);
+        progressErrorView.showProgress();
     }
 
     private void onInitialMovieLoadSuccess(@NonNull MovieSummaryItem movieSummaryItem) {
         moviePosterItemList.addAll(movieSummaryItem.getMoviePosterItems());
+        progressErrorView.setVisibility(View.GONE);
+        recyclerView.setVisibility(View.VISIBLE);
         if (currentPage >= movieSummaryItem.getTotalPages()) {
             adapter.setMoviePosterItems(moviePosterItemList);
         } else {
@@ -231,5 +231,33 @@ public class MovieListActivity extends AppCompatActivity
         recyclerView.addOnScrollListener(endlessOnScrollListener);
     }
     //endregion network request helpers
+
+    private void loadInitialMovieList() {
+        loadMovieInitialListRequest = new LoadMoviesAsyncTask(
+                new LoadMoviesAsyncTask.OnLoadMovieSummaryCallback() {
+                    @Override
+                    public void onPreExecuteLoadMovieSummary() {
+                        onInitialMoviePreLoad();
+                    }
+
+                    @Override
+                    public void onPostExecuteLoadMovieSummary(
+                            MovieSummaryResponse movieSummaryResponse) {
+                        if (movieSummaryResponse.getResponseStatus()
+                                == MovieSummaryResponse.ResponseStatus.ERROR) {
+                            onInitialMovieLoadError();
+                            return;
+                        }
+                        //noinspection OptionalGetWithoutIsPresent
+                        onInitialMovieLoadSuccess(movieSummaryResponse.getMovieSummaryItem().get());
+                    }
+                });
+        loadMovieInitialListRequest.execute();
+    }
+
+    @OnClick(R.id.list_retry_button)
+    public void onRetryClick() {
+        loadInitialMovieList();
+    }
 
 }
