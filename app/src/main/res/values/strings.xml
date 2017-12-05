@@ -6,4 +6,8 @@
     <string name="retry">Retry</string>
     <string name="sort_by_popularity">Sort By Popularity</string>
     <string name="sort_by_rating">Sort By Rating</string>
+
+    <!-- Movie Details -->
+    <string name="release_date_label">Release Date:</string>
+
 </resources>

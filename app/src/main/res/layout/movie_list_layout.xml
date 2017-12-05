@@ -1,46 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/darker_gray">
+    android:orientation="vertical">
 
-    <schaller.com.movetime.view.ProgressErrorView
-        android:id="@+id/movie_list_progress_bar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:visibility="gone" />
-
-    <TextView
-        android:id="@+id/movie_list_error_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/movie_list_progress_bar"
-        android:layout_centerHorizontal="true"
-        android:layout_margin="@dimen/default_margin"
-        android:text="@string/error_loading_list_text"
-        android:textColor="@color/colorPrimary"
-        android:textSize="24sp"
-        android:visibility="gone"
-        tools:visibility="visible" />
-
-    <android.support.v7.widget.AppCompatButton
-        android:id="@+id/list_retry_button"
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/default_button_height"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_margin="@dimen/default_margin"
-        android:background="?attr/colorPrimary"
-        android:text="@string/retry"
-        android:textColor="@android:color/white"
-        android:visibility="gone"
-        tools:visibility="visible" />
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary"
+        android:theme="@style/AppToolbar"/>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/movie_list"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:background="@android:color/darker_gray">
 
-</RelativeLayout>
+        <schaller.com.movetime.view.ProgressErrorView
+            android:id="@+id/movie_list_progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/movie_list_error_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/movie_list_progress_bar"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="@dimen/default_margin"
+            android:text="@string/error_loading_list_text"
+            android:textColor="@color/colorPrimary"
+            android:textSize="24sp"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/list_retry_button"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/default_button_height"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="@dimen/default_margin"
+            android:background="?attr/colorPrimary"
+            android:text="@string/retry"
+            android:textColor="@android:color/white"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/movie_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </RelativeLayout>
+</LinearLayout>

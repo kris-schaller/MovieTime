@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,6 +23,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import schaller.com.movetime.R;
 import schaller.com.movetime.layout_manager.StaggeredGridAutoFitLayoutManager;
+import schaller.com.movetime.movie_details.MovieDetailsActivity;
 import schaller.com.movetime.movies_list.adapter.MovieListAdapter;
 import schaller.com.movetime.movies_list.models.MoviePosterItem;
 import schaller.com.movetime.movies_list.models.MovieSummaryItem;
@@ -57,13 +59,14 @@ public class MovieListActivity extends AppCompatActivity
     @BindView(R.id.list_retry_button) AppCompatButton retryImage;
     @BindView(R.id.movie_list_progress_bar) ProgressErrorView progressErrorView;
     @BindView(R.id.movie_list) RecyclerView recyclerView;
+    @BindView(R.id.toolbar) Toolbar toolbar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.movie_list_layout);
         ButterKnife.bind(this);
-
+        setSupportActionBar(toolbar);
         staggeredGridAutoFitLayoutManager = new StaggeredGridAutoFitLayoutManager(
                 this,
                 StaggeredGridLayoutManager.VERTICAL,
@@ -162,6 +165,7 @@ public class MovieListActivity extends AppCompatActivity
     @Override
     public void onMovieClick(@NonNull MoviePosterItem moviePosterItem) {
         Toast.makeText(this, moviePosterItem.getTitle(), Toast.LENGTH_SHORT).show();
+        startActivity(MovieDetailsActivity.getIntentWithArguments(this, moviePosterItem));
     }
     //endregion OnMovieClickListener
 
