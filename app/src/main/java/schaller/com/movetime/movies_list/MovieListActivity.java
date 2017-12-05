@@ -115,8 +115,8 @@ public class MovieListActivity extends AppCompatActivity
                 Collections.sort(moviePosterItemList, new Comparator<MoviePosterItem>() {
                     @Override
                     public int compare(MoviePosterItem o1, MoviePosterItem o2) {
-                        return o1.getPopularity() < o2.getPopularity() ? -1
-                                : o1.getPopularity() > o2.getPopularity() ? 1
+                        return o2.getPopularity() < o1.getPopularity() ? -1
+                                : o2.getPopularity() > o1.getPopularity() ? 1
                                         : 0;
                     }
                 });
@@ -130,8 +130,8 @@ public class MovieListActivity extends AppCompatActivity
                 Collections.sort(moviePosterItemList, new Comparator<MoviePosterItem>() {
                     @Override
                     public int compare(MoviePosterItem o1, MoviePosterItem o2) {
-                        return o1.getVoteAverage() < o2.getVoteAverage() ? -1
-                                : o1.getVoteAverage() > o2.getVoteAverage() ? 1
+                        return o2.getVoteAverage() < o1.getVoteAverage() ? -1
+                                : o2.getVoteAverage() > o1.getVoteAverage() ? 1
                                         : 0;
                     }
                 });
