@@ -22,7 +22,7 @@ import schaller.com.movetime.movies_list.models.MoviePosterItem;
 
 public class MovieDetailsActivity extends AppCompatActivity {
 
-    public static final String ARGUMENTS_EXTRA = "ARGUMENTS";
+    private static final String ARGUMENTS_EXTRA = "ARGUMENTS";
 
     @BindView(R.id.description) TextView descriptionView;
     @BindView(R.id.poster) ImageView posterView;

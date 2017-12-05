@@ -1,15 +1,11 @@
 package schaller.com.movetime.scroll_listener;
 
-import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 /**
  * Will notify any listeners implementing {@link OnLoadMoreListener} that the list has passed the
@@ -21,11 +17,11 @@ public class EndlessOnScrollListener extends RecyclerView.OnScrollListener {
     // before loading more.
     private static final int VISIBLE_THRESHOLD = 5;
 
+    private final RecyclerView.LayoutManager mLayoutManager;
+
     // Threshold based on number of spans
     private int visibleThreshold = VISIBLE_THRESHOLD;
-
     private OnLoadMoreListener listener;
-    private RecyclerView.LayoutManager mLayoutManager;
 
     public interface OnLoadMoreListener {
 

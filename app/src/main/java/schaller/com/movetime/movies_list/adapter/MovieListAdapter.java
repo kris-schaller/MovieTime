@@ -29,7 +29,8 @@ import schaller.com.movetime.progress_adapter.adapter.ProgressAdapter;
 
 public class MovieListAdapter extends ProgressAdapter<MoviePosterItem> {
 
-    private List<MoviePosterItem> moviePosterItems = new ArrayList<>();
+    private final List<MoviePosterItem> moviePosterItems = new ArrayList<>();
+
     private OnMovieClickListener movieClickListener;
 
     public interface OnMovieClickListener {

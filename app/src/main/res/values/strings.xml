@@ -8,6 +8,8 @@
     <string name="sort_by_rating">Sort By Rating</string>
 
     <!-- Movie Details -->
+    <string name="average_rating_icon">Average rating icon</string>
+    <string name="poster">Movie poster</string>
     <string name="release_date_label">Release Date:</string>
 
 </resources>

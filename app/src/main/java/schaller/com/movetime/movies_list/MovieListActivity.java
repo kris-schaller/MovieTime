@@ -190,7 +190,7 @@ public class MovieListActivity extends AppCompatActivity
                             onMoviePageLoadError();
                             return;
                         }
-                        //noinspection OptionalGetWithoutIsPresent
+                        //noinspection ConstantConditions
                         onMoviePageLoadSuccess(movieSummaryResponse.getMovieSummaryItem().get());
                     }
                 });
@@ -266,13 +266,14 @@ public class MovieListActivity extends AppCompatActivity
                             onInitialMovieLoadError();
                             return;
                         }
-                        //noinspection OptionalGetWithoutIsPresent
+                        //noinspection ConstantConditions
                         onInitialMovieLoadSuccess(movieSummaryResponse.getMovieSummaryItem().get());
                     }
                 });
         loadMovieInitialListRequest.execute();
     }
 
+    @SuppressWarnings("unused")
     private void loadPopularMovieList() {
         String[] pageParams = {LoadMoviesAsyncTask.SORT_BY, LoadMoviesAsyncTask.POPULARITY};
         loadPopularMovieListRequest = new LoadMoviesAsyncTask(
@@ -290,13 +291,14 @@ public class MovieListActivity extends AppCompatActivity
                             onInitialMovieLoadError();
                             return;
                         }
-                        //noinspection OptionalGetWithoutIsPresent
+                        //noinspection ConstantConditions
                         onInitialMovieLoadSuccess(movieSummaryResponse.getMovieSummaryItem().get());
                     }
                 });
         loadPopularMovieListRequest.execute(pageParams);
     }
 
+    @SuppressWarnings("unused")
     private void loadTopRatedMovieList() {
         String[] pageParams = {LoadMoviesAsyncTask.SORT_BY, LoadMoviesAsyncTask.VOTE_AVG};
         loadTopRatedMovieListRequest = new LoadMoviesAsyncTask(
@@ -314,7 +316,7 @@ public class MovieListActivity extends AppCompatActivity
                             onInitialMovieLoadError();
                             return;
                         }
-                        //noinspection OptionalGetWithoutIsPresent
+                        //noinspection ConstantConditions
                         onInitialMovieLoadSuccess(movieSummaryResponse.getMovieSummaryItem().get());
                     }
                 });

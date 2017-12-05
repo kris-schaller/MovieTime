@@ -82,7 +82,7 @@ public class MovieSummaryResponse implements Parcelable {
         dest.writeInt(this.responseStatus);
     }
 
-    protected MovieSummaryResponse(Parcel in) {
+    private MovieSummaryResponse(Parcel in) {
         this.movieSummaryItem = in.readParcelable(MovieSummaryItem.class.getClassLoader());
         this.responseStatus = in.readInt();
     }

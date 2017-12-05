@@ -13,7 +13,7 @@ public class MovieDetailArguments implements Parcelable {
     private final String title;
     private final double voteAvg;
 
-    MovieDetailArguments(@NonNull Builder builder) {
+    private MovieDetailArguments(@NonNull Builder builder) {
         this.posterUrl = builder.posterUrl;
         this.releaseDate = builder.releaseDate;
         this.synopsis = builder.synopsis;
@@ -113,7 +113,7 @@ public class MovieDetailArguments implements Parcelable {
         dest.writeDouble(this.voteAvg);
     }
 
-    protected MovieDetailArguments(Parcel in) {
+    private MovieDetailArguments(Parcel in) {
         this.posterUrl = in.readString();
         this.releaseDate = in.readString();
         this.synopsis = in.readString();

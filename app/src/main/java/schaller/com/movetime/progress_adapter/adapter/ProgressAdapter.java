@@ -43,7 +43,7 @@ public abstract class ProgressAdapter<T> extends RecyclerView.Adapter<RecyclerVi
 
     }
 
-    private RecyclerView.LayoutManager layoutManager;
+    private final RecyclerView.LayoutManager layoutManager;
 
     public ProgressAdapter(@NonNull LinearLayoutManager layoutManager) {
         this.layoutManager = layoutManager;

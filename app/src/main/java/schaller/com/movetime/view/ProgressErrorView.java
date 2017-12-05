@@ -21,7 +21,7 @@ public class ProgressErrorView extends FrameLayout {
     @BindView(R.id.progress_error_image) ImageView errorView;
     @BindView(R.id.progress_error_progress_bar) ProgressBar progressBar;
 
-    private AnimatorSet crossFadeAnimationSet = new AnimatorSet();
+    private final AnimatorSet crossFadeAnimationSet = new AnimatorSet();
 
     public ProgressErrorView(Context context) {
         super(context);
@@ -58,7 +58,7 @@ public class ProgressErrorView extends FrameLayout {
         crossFadeViews(errorView, progressBar);
     }
 
-    public void crossFadeViews(final View fadeOutView, final View fadeInView) {
+    private void crossFadeViews(final View fadeOutView, final View fadeInView) {
         ObjectAnimator fadeInAnimator = ObjectAnimator.ofFloat(fadeInView, "alpha", 0.0f, 1.0f);
         fadeInAnimator.addListener(new Animator.AnimatorListener() {
             @Override

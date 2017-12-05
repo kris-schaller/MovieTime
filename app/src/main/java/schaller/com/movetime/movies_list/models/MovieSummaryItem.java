@@ -15,16 +15,16 @@ import java.util.List;
 public class MovieSummaryItem implements Parcelable {
 
     @SerializedName("page")
-    private int page;
+    private final int page;
 
     @SerializedName("total_results")
-    private int numberOfItems;
+    private final int numberOfItems;
 
     @SerializedName("total_pages")
-    private int totalPages;
+    private final int totalPages;
 
     @SerializedName("results")
-    private List<MoviePosterItem> moviePosterItems;
+    private final List<MoviePosterItem> moviePosterItems;
 
     public MovieSummaryItem(int page,
                             int numberOfItems,
