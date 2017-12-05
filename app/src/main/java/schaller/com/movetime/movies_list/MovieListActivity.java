@@ -121,6 +121,7 @@ public class MovieListActivity extends AppCompatActivity
                     }
                 });
                 adapter.setMoviePosterItemsLoading(moviePosterItemList);
+                staggeredGridAutoFitLayoutManager.scrollToPosition(0);
                 // TODO This is the network request required to complete the project, but it's
                 // TODO unnecessary since the value is included in the object response & you lose
                 // TODO the animation for sorting.
@@ -136,6 +137,7 @@ public class MovieListActivity extends AppCompatActivity
                     }
                 });
                 adapter.setMoviePosterItemsLoading(moviePosterItemList);
+                staggeredGridAutoFitLayoutManager.scrollToPosition(0);
                 // TODO This is the network request required to complete the project, but it's
                 // TODO unnecessary since the value is included in the object response & you lose
                 // TODO the animation for sorting.
