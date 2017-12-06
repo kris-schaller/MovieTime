@@ -48,5 +48,5 @@ dependencies {
     compile 'com.google.code.gson:gson:2.8.1'
 
     // Guava
-    compile 'com.google.guava:guava:21.0'
+    compile 'com.google.guava:guava:18.0'
 }

@@ -40,9 +40,6 @@ public class LoadMoviesAsyncTask
     private static final int READ_TIMEOUT = 15000;
 
     public static final String PAGE_QUERY_KEY = "page";
-    public static final String SORT_BY = "sort_by";
-    public static final String POPULARITY = "popularity.desc";
-    public static final String VOTE_AVG = "vote_average.desc";
 
     private final OnLoadMovieSummaryCallback callback;
 
@@ -66,7 +63,7 @@ public class LoadMoviesAsyncTask
                 .scheme("https")
                 .authority(PATH)
                 .appendPath(API_VERSION)
-                .appendEncodedPath(DISCOVER_MOVIE_PATH)
+                .appendEncodedPath(getApi())
                 .appendQueryParameter(API_TOKEN_KEY, API_TOKEN_VALUE);
         for (String[] param : params) {
             verifyParameter(param);
@@ -112,6 +109,10 @@ public class LoadMoviesAsyncTask
     }
 
     //region helper functions
+    public String getApi() {
+        return DISCOVER_MOVIE_PATH;
+    }
+
     private StringBuilder readInputStream(InputStream inputStream) throws IOException {
         String inputLine;
         InputStreamReader streamReader = new InputStreamReader(inputStream);

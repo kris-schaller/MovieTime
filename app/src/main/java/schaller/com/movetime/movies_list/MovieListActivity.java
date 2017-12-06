@@ -1,6 +1,7 @@
 package schaller.com.movetime.movies_list;
 
 import android.os.Bundle;
+import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -15,8 +16,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -29,6 +28,8 @@ import schaller.com.movetime.movies_list.models.MoviePosterItem;
 import schaller.com.movetime.movies_list.models.MovieSummaryItem;
 import schaller.com.movetime.movies_list.models.MovieSummaryResponse;
 import schaller.com.movetime.movies_list.networking.LoadMoviesAsyncTask;
+import schaller.com.movetime.movies_list.networking.LoadPopularMoviesAsyncTask;
+import schaller.com.movetime.movies_list.networking.LoadTopRatedMoviesAsyncTask;
 import schaller.com.movetime.scroll_listener.EndlessOnScrollListener;
 import schaller.com.movetime.view.ProgressErrorView;
 
@@ -39,19 +40,33 @@ public class MovieListActivity extends AppCompatActivity
     private static final String MOVIE_LIST_KEY = "movie_list_key";
     private static final String LAST_LOADED_PAGE_KEY = "last_loaded_page_key";
 
+    @IntDef({
+        MovieListTypes.POPULAR,
+        MovieListTypes.TOP_RATED
+    })
+    @interface MovieListTypes {
+        int POPULAR = 0;
+        int TOP_RATED = 1;
+    }
+
     // Suppress these warnings so we can make these requests static to avoid memory leaks
     @SuppressWarnings("FieldCanBeLocal")
     private static LoadMoviesAsyncTask loadMovieInitialListRequest;
     @SuppressWarnings("FieldCanBeLocal")
     private static LoadMoviesAsyncTask loadMoviePageRequest;
     @SuppressWarnings("FieldCanBeLocal")
-    private static LoadMoviesAsyncTask loadPopularMovieListRequest;
+    private static LoadPopularMoviesAsyncTask loadPopularMovieListRequest;
     @SuppressWarnings("FieldCanBeLocal")
-    private static LoadMoviesAsyncTask loadTopRatedMovieListRequest;
+    private static LoadMoviesAsyncTask loadPopularMoviePageRequest;
+    @SuppressWarnings("FieldCanBeLocal")
+    private static LoadTopRatedMoviesAsyncTask loadTopRatedMovieListRequest;
+    @SuppressWarnings("FieldCanBeLocal")
+    private static LoadMoviesAsyncTask loadTopRatedMoviePageRequest;
 
     private ArrayList<MoviePosterItem> moviePosterItemList = new ArrayList<>();
     private MovieListAdapter adapter;
     private int currentPage = 1;
+    private @MovieListTypes int currentlyDisplayedMoviesType;
     private StaggeredGridAutoFitLayoutManager staggeredGridAutoFitLayoutManager;
     private EndlessOnScrollListener endlessOnScrollListener;
 
@@ -112,36 +127,36 @@ public class MovieListActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.sort_by_popularity_action:
-                Collections.sort(moviePosterItemList, new Comparator<MoviePosterItem>() {
-                    @Override
-                    public int compare(MoviePosterItem o1, MoviePosterItem o2) {
-                        return o2.getPopularity() < o1.getPopularity() ? -1
-                                : o2.getPopularity() > o1.getPopularity() ? 1
-                                        : 0;
-                    }
-                });
-                adapter.setMoviePosterItemsLoading(moviePosterItemList);
-                staggeredGridAutoFitLayoutManager.scrollToPosition(0);
+//                Collections.sort(moviePosterItemList, new Comparator<MoviePosterItem>() {
+//                    @Override
+//                    public int compare(MoviePosterItem o1, MoviePosterItem o2) {
+//                        return o2.getPopularity() < o1.getPopularity() ? -1
+//                                : o2.getPopularity() > o1.getPopularity() ? 1
+//                                        : 0;
+//                    }
+//                });
+//                adapter.setMoviePosterItemsLoading(moviePosterItemList);
+//                staggeredGridAutoFitLayoutManager.scrollToPosition(0);
                 // TODO This is the network request required to complete the project, but it's
                 // TODO unnecessary since the value is included in the object response & you lose
                 // TODO the animation for sorting.
-                // loadPopularMovieList();
+                 loadPopularMovieList();
                 return true;
             case R.id.sort_by_rating_action:
-                Collections.sort(moviePosterItemList, new Comparator<MoviePosterItem>() {
-                    @Override
-                    public int compare(MoviePosterItem o1, MoviePosterItem o2) {
-                        return o2.getVoteAverage() < o1.getVoteAverage() ? -1
-                                : o2.getVoteAverage() > o1.getVoteAverage() ? 1
-                                        : 0;
-                    }
-                });
-                adapter.setMoviePosterItemsLoading(moviePosterItemList);
-                staggeredGridAutoFitLayoutManager.scrollToPosition(0);
+//                Collections.sort(moviePosterItemList, new Comparator<MoviePosterItem>() {
+//                    @Override
+//                    public int compare(MoviePosterItem o1, MoviePosterItem o2) {
+//                        return o2.getVoteAverage() < o1.getVoteAverage() ? -1
+//                                : o2.getVoteAverage() > o1.getVoteAverage() ? 1
+//                                        : 0;
+//                    }
+//                });
+//                adapter.setMoviePosterItemsLoading(moviePosterItemList);
+//                staggeredGridAutoFitLayoutManager.scrollToPosition(0);
                 // TODO This is the network request required to complete the project, but it's
                 // TODO unnecessary since the value is included in the object response & you lose
                 // TODO the animation for sorting.
-                // loadTopRatedMovieList();
+                 loadTopRatedMovieList();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -175,27 +190,74 @@ public class MovieListActivity extends AppCompatActivity
     @Override
     public void onLoadMore(int totalItemsCount, RecyclerView view) {
         String[] pageParams = {LoadMoviesAsyncTask.PAGE_QUERY_KEY, String.valueOf(currentPage)};
-        loadMoviePageRequest = new LoadMoviesAsyncTask(
-                new LoadMoviesAsyncTask.OnLoadMovieSummaryCallback() {
-                    @Override
-                    public void onPreExecuteLoadMovieSummary() {
-                        onMoviePagePreLoad();
-                    }
+        switch(currentlyDisplayedMoviesType) {
+            case MovieListTypes.TOP_RATED:
+                loadTopRatedMoviePageRequest = new LoadTopRatedMoviesAsyncTask(
+                        new LoadMoviesAsyncTask.OnLoadMovieSummaryCallback() {
+                            @Override
+                            public void onPreExecuteLoadMovieSummary() {
+                                onMoviePagePreLoad();
+                            }
 
-                    @Override
-                    public void onPostExecuteLoadMovieSummary(
-                            MovieSummaryResponse movieSummaryResponse) {
-                        if (movieSummaryResponse.getResponseStatus()
-                                == MovieSummaryResponse.ResponseStatus.ERROR) {
-                            onMoviePageLoadError();
-                            return;
-                        }
-                        //noinspection ConstantConditions
-                        onMoviePageLoadSuccess(movieSummaryResponse.getMovieSummaryItem().get());
-                    }
-                });
+                            @Override
+                            public void onPostExecuteLoadMovieSummary(
+                                    MovieSummaryResponse movieSummaryResponse) {
+                                if (movieSummaryResponse.getResponseStatus()
+                                        == MovieSummaryResponse.ResponseStatus.ERROR) {
+                                    onMoviePageLoadError();
+                                    return;
+                                }
+                                //noinspection ConstantConditions
+                                onMoviePageLoadSuccess(movieSummaryResponse.getMovieSummaryItem().get());
+                            }
+                        });
+                loadTopRatedMoviePageRequest.execute(pageParams);
+                break;
+            case MovieListTypes.POPULAR:
+                loadPopularMoviePageRequest = new LoadPopularMoviesAsyncTask(
+                        new LoadMoviesAsyncTask.OnLoadMovieSummaryCallback() {
+                            @Override
+                            public void onPreExecuteLoadMovieSummary() {
+                                onMoviePagePreLoad();
+                            }
 
-        loadMoviePageRequest.execute(pageParams);
+                            @Override
+                            public void onPostExecuteLoadMovieSummary(
+                                    MovieSummaryResponse movieSummaryResponse) {
+                                if (movieSummaryResponse.getResponseStatus()
+                                        == MovieSummaryResponse.ResponseStatus.ERROR) {
+                                    onMoviePageLoadError();
+                                    return;
+                                }
+                                //noinspection ConstantConditions
+                                onMoviePageLoadSuccess(movieSummaryResponse.getMovieSummaryItem().get());
+                            }
+                        });
+                loadPopularMoviePageRequest.execute(pageParams);
+                break;
+            default:
+                loadMoviePageRequest = new LoadMoviesAsyncTask(
+                        new LoadMoviesAsyncTask.OnLoadMovieSummaryCallback() {
+                            @Override
+                            public void onPreExecuteLoadMovieSummary() {
+                                onMoviePagePreLoad();
+                            }
+
+                            @Override
+                            public void onPostExecuteLoadMovieSummary(
+                                    MovieSummaryResponse movieSummaryResponse) {
+                                if (movieSummaryResponse.getResponseStatus()
+                                        == MovieSummaryResponse.ResponseStatus.ERROR) {
+                                    onMoviePageLoadError();
+                                    return;
+                                }
+                                //noinspection ConstantConditions
+                                onMoviePageLoadSuccess(movieSummaryResponse.getMovieSummaryItem().get());
+                            }
+                        });
+                loadMoviePageRequest.execute(pageParams);
+                break;
+        }
     }
     //endregion OnLoadMoreListener
 
@@ -218,6 +280,7 @@ public class MovieListActivity extends AppCompatActivity
     }
 
     private void onInitialMovieLoadSuccess(@NonNull MovieSummaryItem movieSummaryItem) {
+        moviePosterItemList.clear();
         moviePosterItemList.addAll(movieSummaryItem.getMoviePosterItems());
         progressErrorView.setVisibility(View.GONE);
         recyclerView.setVisibility(View.VISIBLE);
@@ -255,6 +318,7 @@ public class MovieListActivity extends AppCompatActivity
                 new LoadMoviesAsyncTask.OnLoadMovieSummaryCallback() {
                     @Override
                     public void onPreExecuteLoadMovieSummary() {
+                        currentlyDisplayedMoviesType = MovieListTypes.POPULAR;
                         onInitialMoviePreLoad();
                     }
 
@@ -275,12 +339,12 @@ public class MovieListActivity extends AppCompatActivity
 
     @SuppressWarnings("unused")
     private void loadPopularMovieList() {
-        String[] pageParams = {LoadMoviesAsyncTask.SORT_BY, LoadMoviesAsyncTask.POPULARITY};
-        loadPopularMovieListRequest = new LoadMoviesAsyncTask(
+        loadPopularMovieListRequest = new LoadPopularMoviesAsyncTask(
                 new LoadMoviesAsyncTask.OnLoadMovieSummaryCallback() {
                     @Override
                     public void onPreExecuteLoadMovieSummary() {
                         onInitialMoviePreLoad();
+                        currentlyDisplayedMoviesType = MovieListTypes.POPULAR;
                     }
 
                     @Override
@@ -295,17 +359,17 @@ public class MovieListActivity extends AppCompatActivity
                         onInitialMovieLoadSuccess(movieSummaryResponse.getMovieSummaryItem().get());
                     }
                 });
-        loadPopularMovieListRequest.execute(pageParams);
+        loadPopularMovieListRequest.execute();
     }
 
     @SuppressWarnings("unused")
     private void loadTopRatedMovieList() {
-        String[] pageParams = {LoadMoviesAsyncTask.SORT_BY, LoadMoviesAsyncTask.VOTE_AVG};
-        loadTopRatedMovieListRequest = new LoadMoviesAsyncTask(
+        loadTopRatedMovieListRequest = new LoadTopRatedMoviesAsyncTask(
                 new LoadMoviesAsyncTask.OnLoadMovieSummaryCallback() {
                     @Override
                     public void onPreExecuteLoadMovieSummary() {
                         onInitialMoviePreLoad();
+                        currentlyDisplayedMoviesType = MovieListTypes.TOP_RATED;
                     }
 
                     @Override
@@ -320,7 +384,7 @@ public class MovieListActivity extends AppCompatActivity
                         onInitialMovieLoadSuccess(movieSummaryResponse.getMovieSummaryItem().get());
                     }
                 });
-        loadTopRatedMovieListRequest.execute(pageParams);
+        loadTopRatedMovieListRequest.execute();
     }
 
     @OnClick(R.id.list_retry_button)
